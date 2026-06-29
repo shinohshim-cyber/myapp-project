@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: backend
+
+server:
+  port: 8080
+
+  profiles:
+    active: local
+    group:
+      local:
+        - common
+      prod:
+        - common
+---
+# "---" 파일 분리 역할
+spring:
+  config:
+    activate:
+      on-profile: common
+      #공통 설정 파일 기록
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://db:3306/myapp?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:1111}
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update   # 최초 개발 단계에만 update 권장 → 생성 후 validate로 변경
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+
+app:
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${RDS_ENDPOINT:my-prod-database}:3306/myapp?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: validate # 운영은 validate 고정
+    properties:
+      hibernate:
+        show_sql: false
+
+app:
+  allowed-origins: ${ALLOWED_ORIGINS:https://YOUR_DOMAIN}
